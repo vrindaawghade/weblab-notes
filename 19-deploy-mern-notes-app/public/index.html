@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MERN Notes</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="config.js"></script>
+</head>
+<body class="bg-light">
+<div id="root" class="container py-5" style="max-width:720px"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const API = (window.API_URL || '') + '/api/notes';
+const H = { 'Content-Type': 'application/json' };
+function App() {
+  const [notes, setNotes] = useState([]);
+  const [form, setForm] = useState({ title: '', content: '' });
+  const load = () => fetch(API).then(r => r.json()).then(setNotes);
+  useEffect(() => { load(); }, []);
+
+  const add = async e => {
+    e.preventDefault();
+    await fetch(API, { method: 'POST', headers: H, body: JSON.stringify(form) });
+    setForm({ title: '', content: '' }); load();
+  };
+  const del = async n => { await fetch(`${API}/${n._id}`, { method: 'DELETE' }); load(); };
+
+  return (
+    <div>
+      <h2 className="mb-3">MERN Notes</h2>
+      <form className="card card-body mb-4 shadow-sm" onSubmit={add}>
+        <input className="form-control mb-2" placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
+        <textarea className="form-control mb-2" rows="3" placeholder="Write your note..." value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
+        <button className="btn btn-primary">Add note</button>
+      </form>
+      <div className="row g-3">
+        {notes.map(n => (
+          <div className="col-sm-6" key={n._id}>
+            <div className="card h-100"><div className="card-body">
+              <h5>{n.title}</h5><p className="mb-2">{n.content}</p>
+              <button className="btn btn-sm btn-outline-danger" onClick={() => del(n)}>Delete</button>
+            </div></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

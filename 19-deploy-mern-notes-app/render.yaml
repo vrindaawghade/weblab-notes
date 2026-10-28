@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: weblab-notes
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: CLIENT_URL
+        value: "*"
